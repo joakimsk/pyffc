@@ -1,11 +1,14 @@
+import time
 import numpy as np
 import skimage
 
+# generate_mask.py
+# Used to generate a mask for FFC-processing. Requires you to pick out a few pictures without any specific features on them.
+# If you are using this script for AUV-photos, it may be imperative to only select photos from a certain altitude, and use the mask only for a certain altitude.
+# Also a large change in biome may require a new mask to be generated.
+# Joakim Skjefstad, 2024
+
 def imread_rgb(f):
-    '''
-    Function used to read in rgb images properly through
-    skimage ImageCollection.
-    '''
     return skimage.io.imread(f)
 
 def blend_images(images):
@@ -23,6 +26,7 @@ def blend_images(images):
 
 
 def main():
+    start = time.time()
     print("Generating mask from .jpg-images in mask-subfolder")
     data = skimage.io.ImageCollection('mask//*.jpg', conserve_memory=False, load_func=imread_rgb)
     if not data:
@@ -32,6 +36,8 @@ def main():
     blended_image = blend_images(image_series)
     mask = skimage.util.img_as_ubyte(blended_image)
     skimage.io.imsave('mask.png', mask)
+    end = time.time()
+    print(f'Time used: {end - start:.2f} [s]')
 
 if __name__ == "__main__":
     main()
