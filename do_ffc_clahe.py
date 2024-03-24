@@ -9,6 +9,7 @@ from skimage import filters
 
 # do_ffc_clahe.py
 # Uses the mask file in order to "flat field correct" the input file. Afterwards, it also does CLAHE (Adaptive Histogram Equalization), you can tweak it using clip_limit parameter.
+# Adaptive historgram equalization kernel size is normally 1/8th of width/height, you can modify that as-well, depending on image size.
 # If you are using this script for AUV-photos, it may be imperative to only select photos from a certain altitude, and use the mask only for a certain altitude.
 # Also a large change in biome may require a new mask to be generated.
 # Joakim Skjefstad, 2024
@@ -16,6 +17,11 @@ from skimage import filters
 start = time.time()
 
 clip_limit = 0.007 # Tweak this slightly if needed. Default is 0.007
+
+# Kernel size calculation
+img_width = 4096
+img_height = 2304
+factor = 8 # Default is 8
 
 input_filename = "sample//sample.jpg"
 pathname, extension = os.path.splitext(input_filename)
@@ -35,11 +41,6 @@ print("Max value after gain adjustment", np.max(gain_adjusted_ffc))
 
 print("Saving ffc...")
 io.imsave(f'{pathname}_ffc.jpg', util.img_as_ubyte(gain_adjusted_ffc))
-
-# Kernel size calculation
-img_width = 4096
-img_height = 2304
-factor = 8 # Default is 8
 
 img_adapteq = exposure.equalize_adapthist(np.clip(gain_adjusted_ffc, 0.0, 1.0), nbins=255, kernel_size=(img_width/factor, img_height/factor), clip_limit=clip_limit)
 print("Max value after CLAHE", np.max(img_adapteq))
